@@ -19,16 +19,3 @@ public class PreFilter extends Chugen {
     }
 }
 
-SinOsc sin => blackhole;
-sin.freq(0.25);
-
-Noise n => PreFilter p => dac;
-
-while (true) {
-    p.setAngularFrequency(((sin.last() + 1.0) * 0.5) * pi * 2.0);
-    <<< p.last() >>>;
-    ms => now;
-}
-
-second => now;
-
