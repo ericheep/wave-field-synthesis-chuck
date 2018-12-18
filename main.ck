@@ -11,7 +11,10 @@ fun void setup() {
     8 => int speakerNumber;
     48.26 => float speakerArrayLength;
 
+    // required before any other funcction call
     wfs.setSpeakerNumber(speakerNumber);
+
+    wfs.setReferenceLine(0.0, 0.5, 1.0, 0.5);
     wfs.setLineArrayLength(speakerArrayLength);
 
     1.0 / (speakerNumber - 1) => float speakerSpacing;
