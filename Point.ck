@@ -8,6 +8,11 @@ public class Point {
         _y => y;
     }
 
+    public void set(Point p) {
+        p.x => x;
+        p.y => y;
+    }
+
     public int isEqual(Point p) {
         if (p.x == x && p.y == y) {
             return true;

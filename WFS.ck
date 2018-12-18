@@ -1,8 +1,11 @@
 // WFS.ck
 
 public class WFS {
+    float amplitudes[0];
     Speaker speakers[0];
     Line referenceLine;
+    Point memoSourcePoint;
+
     0.0 => float lineArrayLength;
     0 => int speakerNumber;
     340 => float C;
@@ -16,6 +19,8 @@ public class WFS {
             Speaker s;
             speakers << s;
             speakers[i].setReferenceLine(referenceLine);
+
+            amplitudes << 0.0;
         }
         number => speakerNumber;
     }
@@ -45,10 +50,20 @@ public class WFS {
         length => lineArrayLength;
     }
 
+    public float[] getAmplitudes() {
+        return amplitudes;
+    }
+
     // in m
     public void update(Point sourcePoint) {
         for (0 => int i; i < speakerNumber; i++) {
-            speakers[i].update(sourcePoint);
+            if (!memoSourcePoint.isEqual(sourcePoint)) {
+                speakers[i].calculateAmplitude(sourcePoint) => amplitudes[i];
+            } else {
+                speakers[i].getAmplitude() => amplitudes[i];
+            }
         }
+
+        memoSourcePoint.set(sourcePoint);
     }
 }
