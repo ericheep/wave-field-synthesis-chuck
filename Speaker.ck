@@ -47,7 +47,7 @@ public class Speaker {
             Math.fabs(radiusRef)
         ) => float thirdTerm;
 
-        firstTerm * secondTerm * thirdTerm => amplitude;
+        firstTerm * (secondTerm/thirdTerm) => amplitude;
         return amplitude;
     }
 }
