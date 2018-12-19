@@ -1,10 +1,26 @@
 // main.ck
 
 fun void main() {
-    2    => int NUM_SPEAKERS;;
-    1.5  => float referenceLineOffset;
-    1.0  => float xSize;
-    0.41 => float speakerArrayLength;
+    "laptop" => string type;
+    float referenceLineOffset;
+    float xSize;
+    int NUM_SPEAKERS;
+    float speakerArrayLength;
+
+    // all units are meters
+    if (type == "speakerArray") {
+        1.5   => referenceLineOffset;
+        1.0   => xSize;
+
+        16    => NUM_SPEAKERS;
+        0.88  => speakerArrayLength;
+    } else if (type == "laptop") {
+        0.6   => referenceLineOffset;
+        0.6   => xSize;
+
+        2     => NUM_SPEAKERS;
+        0.315 => speakerArrayLength;
+    }
 
     WFS wfs;
     wfsSetup(wfs, NUM_SPEAKERS, referenceLineOffset, xSize, speakerArrayLength);
