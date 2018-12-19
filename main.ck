@@ -10,16 +10,21 @@ fun void main() {
     wfsSetup(wfs, NUM_SPEAKERS, referenceLineOffset, xSize, speakerArrayLength);
 
     // sound chain
-    CNoise pink;
-    pink.gain(0.2);
     Gain g[NUM_SPEAKERS];
     Delay d[NUM_SPEAKERS];
 
     for (0 => int i; i < NUM_SPEAKERS; i++) {
-        pink => g[i] => d[i] => dac.chan(i);
+        g[i] => d[i] => dac.chan(i);
     }
 
     Point sourcePoint;
+    /* movingPinkNoise(wfs, sourcePoint, NUM_SPEAKERS, g, d); */
+    voicePositions(wfs, sourcePoint, NUM_SPEAKERS, g, d);
+}
+
+fun void movingPinkNoise (WFS wfs, Point sourcePoint, int numSpeakers, Delay d[], Gain g[]) {
+    CNoise pink;
+    pink.gain(0.2);
 
     // spatial sines
     SinOsc xSine => blackhole;
@@ -29,16 +34,51 @@ fun void main() {
     ySine.freq(0.25);
     ySine.phase(0.25);
 
+    for (0 => int i; i < numSpeakers; i++) {
+        pink => g[i];;
+    }
+
     while (true) {
         xSine.last() + 0.5 => float x;
         ySine.last() * 2.5 + 3.0 => float y;
 
         sourcePoint.set(x, 2.0);
-        wfsUpdate(wfs, NUM_SPEAKERS, sourcePoint, g, d);
+        wfsUpdate(wfs, numSpeakers, sourcePoint, g, d);
 
         0.25::ms => now;
     }
 }
+
+fun void voicePositions (WFS wfs, Point sourcePoint, int numSpeakers, Gain g[], Delay d[]) {
+    SndBuf voice;
+
+    ["left-front.aiff",  "middle-front.aiff",  "right-front.aiff",
+     "left-center.aiff", "middle-center.aiff", "right-center.aiff",
+     "left-back.aiff",   "middle-back.aiff",   "right-back.aiff"]
+     @=> string voiceFiles[];
+
+    [[0.0, 1.0], [0.5, 1.0], [1.0, 1.0],
+     [0.0, 1.5], [0.5, 1.5], [1.0, 1.5],
+     [0.0, 2.5], [0.5, 2.5], [1.0, 2.5]]
+     @=> float voiceCoordinates[][];
+
+    for (0 => int i; i < numSpeakers; i++) {
+        voice => g[i];;
+    }
+
+    0 => int which;
+    while (true) {
+        voice.read(me.dir() + "voice-positions/" + voiceFiles[which]);
+        voice.pos(0);
+
+        sourcePoint.set(voiceCoordinates[which][0], voiceCoordinates[which][1]);
+        wfsUpdate(wfs, numSpeakers, sourcePoint, g, d);
+
+        (voice.samples() * 2)::samp => now;
+        (which + 1) % voiceFiles.size() => which;
+    }
+}
+
 
 fun void wfsUpdate(WFS wfs, int numSpeakers, Point sourcePoint, Gain g[], Delay d[]) {
     wfs.update(sourcePoint);
