@@ -1,10 +1,9 @@
 // Speaker.ck
 
 public class Speaker {
-    float normal, radiusRef, amplitude;
+    float normal, radiusRef, amplitude, delayTime;
     Point speakerPoint;
     Line referenceLine;
-
 
     public void setSpeakerPoint(float x, float y) {
         speakerPoint.set(x, y);
@@ -23,6 +22,15 @@ public class Speaker {
 
     public float getAmplitude() {
         return amplitude;
+    }
+
+    public float getDelayTime() {
+        return delayTime;
+    }
+
+    public float calculateDelayTime(Point sourcePoint, float c) {
+        speakerPoint.distanceFromPoint(sourcePoint)/c => delayTime;
+        return delayTime;
     }
 
     public float calculateAmplitude(Point sourcePoint) {

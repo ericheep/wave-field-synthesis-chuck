@@ -1,49 +1,75 @@
 // main.ck
 
+16 => int NUM_SPEAKERS;;
+
 WFS wfs;
+WFSsetup(NUM_SPEAKERS);
 Point sourcePoint;
-sourcePoint.set(0.5, 0.500);
-SinOsc sourceSine => blackhole;
-sourceSine.freq(0.4);
 
-8 => int speakerNumber;
+SinOsc xSine => blackhole;
+SinOsc ySine => blackhole;
+xSine.freq(0.25);
+ySine.freq(0.25);
+ySine.phase(pi/2);
 
-WFSsetup(speakerNumber);
+CNoise nois;
+nois.gain(0.4);
+Gain g[NUM_SPEAKERS];
+Delay d[NUM_SPEAKERS];
 
-Noise n;
-Gain g[8];
-n.gain(0.2);
-
-for (0 => int i; i < speakerNumber; i++) {
-    n => g[i] => dac.chan(i);
+for (0 => int i; i < NUM_SPEAKERS; i++) {
+    nois => g[i] => dac.chan(i);
 }
 
 while (true) {
-    (sourceSine.last() + 1.0) * 0.5 => float x;
-    sourcePoint.set(x, 0.5);
-    10::ms => now;
+    (xSine.last() * 1.0) + 0.5  => float x;
+    (ySine.last() * 1.0) + 2.0 => float y;
+    sourcePoint.set(x, y);
+    2::ms => now;
 
     wfs.update(sourcePoint);
     wfs.getAmplitudes() @=> float amplitudes[];
+    wfs.getDelayTimes() @=> float delayTimes[];
 
-    for (0 => int i; i < speakerNumber; i++) {
+    for (0 => int i; i < NUM_SPEAKERS; i++) {
         g[i].gain(amplitudes[i]);
+        d[i].delay(delayTimes[i]::second);
     }
+
+    printValues(amplitudes, delayTimes);
+}
+
+fun void printValues(float amplitudes[], float delayTimes[]) {
+    string amplitudeString;
+    string delayString;
+
+    for (0 => int i; i < amplitudes.size(); i++) {
+        amplitudes[i] + "" => string amp;
+        delayTimes[i] + "" => string del;
+        amp.substring(0, 4) + " " +  amplitudeString => amplitudeString;
+        del.substring(0, 6) + " " +  delayString => delayString;
+    }
+
+    <<< amplitudeString + " | " + delayString, "" >>>;
 }
 
 fun void WFSsetup(int speakerNumber) {
-    48.26 => float speakerArrayLength;
+    // in meters
+    1.0 => float xSize;
+    2.0 => float ySize;
+    0.41 => float speakerArrayLength;
 
     // required before any other funcction call
     wfs.setSpeakerNumber(speakerNumber);
 
-    wfs.setReferenceLine(0.0, 0.5, 1.0, 0.5);
-    wfs.setLineArrayLength(speakerArrayLength);
+    wfs.setReferenceLine(0.0, 2.0, 1.0, 2.0);
 
-    1.0 / (speakerNumber - 1) => float speakerSpacing;
+    speakerArrayLength / (speakerNumber - 1) => float speakerSpacing;
+    xSize * 0.5 - speakerArrayLength * 0.5 => float speakerStartingPoint;
     for (0 => int i; i < speakerNumber; i++) {
-        speakerSpacing * i => float x;
+        speakerStartingPoint + speakerSpacing * i => float x;
         0.0 => float y;
+
         wfs.setSpeakerPoint(i, x, y);
         wfs.setSpeakerNormal(i, 270);
     }
