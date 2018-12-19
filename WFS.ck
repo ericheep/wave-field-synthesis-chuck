@@ -44,6 +44,14 @@ public class WFS {
         speakers[index].setSpeakerPoint(x, y);
     }
 
+    public void setReferenceLine(float r) {
+        referenceLine.set(0.0, r, 1.0, r);
+
+        for (0 => int i; i < speakerNumber; i++) {
+            speakers[i].setReferenceLine(referenceLine);
+        }
+    }
+
     public void setReferenceLine(float x1, float y1, float x2, float y2) {
         referenceLine.set(x1, y1, x2, y2);
 
