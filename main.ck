@@ -1,18 +1,22 @@
 // main.ck
 
 fun void main() {
-    16 => int NUM_SPEAKERS;;
+    2 => int NUM_SPEAKERS;;
+    1.5 => float referenceLineOffset;
+    1.0 => float xSize;
+    0.41 => float speakerArrayLength;
+
     WFS wfs;
-    wfsSetup(wfs, NUM_SPEAKERS);
+    wfsSetup(wfs, NUM_SPEAKERS, referenceLineOffset, xSize, speakerArrayLength);
 
     // sound chain
-    CNoise nois;
-    nois.gain(0.2);
+    CNoise pink;
+    pink.gain(0.2);
     Gain g[NUM_SPEAKERS];
     Delay d[NUM_SPEAKERS];
 
     for (0 => int i; i < NUM_SPEAKERS; i++) {
-        nois => g[i] => d[i] => dac.chan(i);
+        pink => g[i] => d[i] => dac.chan(i);
     }
 
     Point sourcePoint;
@@ -21,7 +25,7 @@ fun void main() {
     SinOsc xSine => blackhole;
     SinOsc ySine => blackhole;
 
-    xSine.freq(110.0);
+    xSine.freq(0.25);
     ySine.freq(0.25);
     ySine.phase(0.25);
 
@@ -41,7 +45,7 @@ fun void main() {
 
         printValues(amplitudes, delayTimes);
 
-        1::ms => now;
+        0.25::ms => now;
     }
 }
 
@@ -51,22 +55,17 @@ fun void printValues(float amplitudes[], float delayTimes[]) {
 
     for (0 => int i; i < amplitudes.size(); i++) {
         amplitudes[i] + "" => string amp;
-        /* delayTimes[i] + "" => string del; */
         amp.substring(0, 4) + " " +  amplitudeString => amplitudeString;
+        /* delayTimes[i] + "" => string del; */
         /* del.substring(0, 6) + " " +  delayString => delayString; */
     }
 
     <<< amplitudeString + " | " + delayString, "" >>>;
 }
 
-fun void wfsSetup(WFS wfs, int numSpeakers) {
-    // in meters
-    1.0 => float xSize;
-    0.41 => float speakerArrayLength;
-
-    // required before any other funcction call
+fun void wfsSetup(WFS wfs, int numSpeakers, float referenceLine, float xSize, float speakerArrayLength) {
     wfs.setSpeakerNumber(numSpeakers);
-    wfs.setReferenceLine(1.5);
+    wfs.setReferenceLine(referenceLine);
 
     speakerArrayLength / (numSpeakers - 1) => float speakerSpacing;
     xSize * 0.5 - speakerArrayLength * 0.5 => float speakerStartingPoint;
