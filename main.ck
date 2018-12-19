@@ -1,9 +1,9 @@
 // main.ck
 
 fun void main() {
-    2 => int NUM_SPEAKERS;;
-    1.5 => float referenceLineOffset;
-    1.0 => float xSize;
+    2    => int NUM_SPEAKERS;;
+    1.5  => float referenceLineOffset;
+    1.0  => float xSize;
     0.41 => float speakerArrayLength;
 
     WFS wfs;
@@ -30,23 +30,27 @@ fun void main() {
     ySine.phase(0.25);
 
     while (true) {
-        xSine.last() + 0.5  => float x;
+        xSine.last() + 0.5 => float x;
         ySine.last() * 2.5 + 3.0 => float y;
+
         sourcePoint.set(x, 2.0);
-
-        wfs.update(sourcePoint);
-        wfs.getAmplitudes() @=> float amplitudes[];
-        wfs.getDelayTimes() @=> float delayTimes[];
-
-        for (0 => int i; i < NUM_SPEAKERS; i++) {
-            g[i].gain(amplitudes[i]);
-            d[i].delay(delayTimes[i]::second);
-        }
-
-        printValues(amplitudes, delayTimes);
+        wfsUpdate(wfs, NUM_SPEAKERS, sourcePoint, g, d);
 
         0.25::ms => now;
     }
+}
+
+fun void wfsUpdate(WFS wfs, int numSpeakers, Point sourcePoint, Gain g[], Delay d[]) {
+    wfs.update(sourcePoint);
+    wfs.getAmplitudes() @=> float amplitudes[];
+    wfs.getDelayTimes() @=> float delayTimes[];
+
+    for (0 => int i; i < numSpeakers; i++) {
+        g[i].gain(amplitudes[i]);
+        d[i].delay(delayTimes[i]::second);
+    }
+
+    printValues(amplitudes, delayTimes);
 }
 
 fun void printValues(float amplitudes[], float delayTimes[]) {
@@ -56,8 +60,8 @@ fun void printValues(float amplitudes[], float delayTimes[]) {
     for (0 => int i; i < amplitudes.size(); i++) {
         amplitudes[i] + "" => string amp;
         amp.substring(0, 4) + " " +  amplitudeString => amplitudeString;
-        /* delayTimes[i] + "" => string del; */
-        /* del.substring(0, 6) + " " +  delayString => delayString; */
+        delayTimes[i] + "" => string del;
+        del.substring(0, 6) + " " +  delayString => delayString;
     }
 
     <<< amplitudeString + " | " + delayString, "" >>>;
