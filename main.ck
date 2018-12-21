@@ -1,7 +1,7 @@
 // main.ck
 
 fun void main() {
-    "laptop" => string type;
+    "speakerArray" => string type;
     float referenceLineOffset;
     float xSize;
     int NUM_SPEAKERS;
@@ -9,15 +9,13 @@ fun void main() {
 
     // all units are meters
     if (type == "speakerArray") {
-        1.5   => referenceLineOffset;
+        1.0   => referenceLineOffset;
         1.0   => xSize;
-
         16    => NUM_SPEAKERS;
         0.88  => speakerArrayLength;
     } else if (type == "laptop") {
-        0.6   => referenceLineOffset;
-        0.6   => xSize;
-
+        0.5   => referenceLineOffset;
+        0.315 => xSize;
         2     => NUM_SPEAKERS;
         0.315 => speakerArrayLength;
     }
@@ -30,7 +28,7 @@ fun void main() {
     Delay d[NUM_SPEAKERS];
 
     for (0 => int i; i < NUM_SPEAKERS; i++) {
-        g[i] => d[i] => dac.chan(i);
+        /* g[i] => d[i] => dac.chan(i); */
     }
 
     Point sourcePoint;
@@ -73,13 +71,14 @@ fun void voicePositions (WFS wfs, Point sourcePoint, int numSpeakers, Gain g[], 
      "left-back.aiff",   "middle-back.aiff",   "right-back.aiff"]
      @=> string voiceFiles[];
 
-    [[0.0, 1.0], [0.5, 1.0], [1.0, 1.0],
-     [0.0, 1.5], [0.5, 1.5], [1.0, 1.5],
-     [0.0, 2.5], [0.5, 2.5], [1.0, 2.5]]
+    [[0.1, 0.5], [0.5, 0.5], [0.9, 0.5],
+     [0.1, 2.5], [0.5, 2.5], [0.9, 2.5],
+     [0.1, 4.0], [0.5, 4.0], [0.9, 4.0]]
      @=> float voiceCoordinates[][];
 
     for (0 => int i; i < numSpeakers; i++) {
         voice => g[i];;
+        voice.gain(0.2);
     }
 
     0 => int which;
@@ -90,7 +89,7 @@ fun void voicePositions (WFS wfs, Point sourcePoint, int numSpeakers, Gain g[], 
         sourcePoint.set(voiceCoordinates[which][0], voiceCoordinates[which][1]);
         wfsUpdate(wfs, numSpeakers, sourcePoint, g, d);
 
-        (voice.samples() * 2)::samp => now;
+        (voice.samples() * 3)::samp => now;
         (which + 1) % voiceFiles.size() => which;
     }
 }
@@ -106,7 +105,7 @@ fun void wfsUpdate(WFS wfs, int numSpeakers, Point sourcePoint, Gain g[], Delay 
         d[i].delay(delayTimes[i]::second);
     }
 
-    printValues(amplitudes, delayTimes);
+    /* printValues(amplitudes, delayTimes); */
 }
 
 fun void printValues(float amplitudes[], float delayTimes[]) {
@@ -116,19 +115,21 @@ fun void printValues(float amplitudes[], float delayTimes[]) {
     for (0 => int i; i < amplitudes.size(); i++) {
         amplitudes[i] + "" => string amp;
         amp.substring(0, 4) + " " +  amplitudeString => amplitudeString;
-        delayTimes[i] + "" => string del;
-        del.substring(0, 6) + " " +  delayString => delayString;
+        /* delayTimes[i] + "" => string del; */
+        /* del.substring(0, 6) + " " +  delayString => delayString; */
     }
 
-    <<< amplitudeString + " | " + delayString, "" >>>;
+    <<< amplitudeString + delayString, "" >>>;
 }
 
 fun void wfsSetup(WFS wfs, int numSpeakers, float referenceLine, float xSize, float speakerArrayLength) {
     wfs.setSpeakerNumber(numSpeakers);
     wfs.setReferenceLine(referenceLine);
+    wfs.setSpeakerArrayLength(speakerArrayLength);
 
     speakerArrayLength / (numSpeakers - 1) => float speakerSpacing;
     xSize * 0.5 - speakerArrayLength * 0.5 => float speakerStartingPoint;
+
     for (0 => int i; i < numSpeakers; i++) {
         speakerStartingPoint + speakerSpacing * i => float x;
         0.0 => float y;
@@ -136,6 +137,7 @@ fun void wfsSetup(WFS wfs, int numSpeakers, float referenceLine, float xSize, fl
         wfs.setSpeakerPoint(i, x, y);
         wfs.setSpeakerNormal(i, 270);
     }
+    wfs.setTaperAttenuations();
 }
 
 main();

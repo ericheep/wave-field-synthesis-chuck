@@ -3,15 +3,16 @@
 public class WFS {
     float amplitudes[0];
     float delayTimes[0];
-
-    float length, width;
+    float length, width, speakerArrayLength;
+    int isTapered;
+    0.2 => float taperWindow;
+    1.05 => float taperLength;
 
     Speaker speakers[0];
     Line referenceLine;
     Point memoSourcePoint;
 
-    0.0 => float lineArrayLength;
-    0 => int speakerNumber;
+    0   => int numSpeakers;
     340 => float C;
 
     // in meters
@@ -24,6 +25,32 @@ public class WFS {
         c => C;
     }
 
+    public void setSpeakerArrayLength(float cm) {
+        cm => speakerArrayLength;
+
+        if (taperLength == 0) {
+            cm => taperLength;
+        }
+    }
+
+    public void setTaperLength(float cm) {
+        cm => taperLength;
+    }
+
+    public void setTaperAttenuations() {
+        speakerArrayLength / (numSpeakers - 1) => float speakerSpacing;
+        taperLength * 0.5 - speakerArrayLength * 0.5 => float speakerStartingPoint;
+
+        for (0 => int i; i < numSpeakers; i++) {
+            speakerStartingPoint + speakerSpacing * i => float x;
+
+            if (x < taperWindow || x > taperLength - taperWindow) {
+                Math.sin(pi * x/taperLength) => float w;
+                <<< i, w >>>;
+            }
+        }
+    }
+
     public void setSpeakerNumber(int number) {
         for (0 => int i; i < number; i++) {
             Speaker s;
@@ -33,11 +60,7 @@ public class WFS {
             amplitudes << 0.0;
             delayTimes << 0.0;
         }
-        number => speakerNumber;
-    }
-
-    public void setLineArrayLength(float cm) {
-        cm => lineArrayLength;
+        number => numSpeakers;
     }
 
     public void setSpeakerPoint(int index, float x, float y) {
@@ -47,7 +70,7 @@ public class WFS {
     public void setReferenceLine(float r) {
         referenceLine.set(0.0, r, 1.0, r);
 
-        for (0 => int i; i < speakerNumber; i++) {
+        for (0 => int i; i < numSpeakers; i++) {
             speakers[i].setReferenceLine(referenceLine);
         }
     }
@@ -55,18 +78,13 @@ public class WFS {
     public void setReferenceLine(float x1, float y1, float x2, float y2) {
         referenceLine.set(x1, y1, x2, y2);
 
-        for (0 => int i; i < speakerNumber; i++) {
+        for (0 => int i; i < numSpeakers; i++) {
             speakers[i].setReferenceLine(referenceLine);
         }
     }
 
     public void setSpeakerNormal(int index, float angle) {
         speakers[index].setSpeakerNormal(angle);
-    }
-
-    // in m
-    public void setLineArrayLength(float length) {
-        length => lineArrayLength;
     }
 
     public float[] getDelayTimes() {
@@ -79,7 +97,7 @@ public class WFS {
 
     // in m
     public void update(Point sourcePoint) {
-        for (0 => int i; i < speakerNumber; i++) {
+        for (0 => int i; i < numSpeakers; i++) {
             if (!memoSourcePoint.isEqual(sourcePoint)) {
                 speakers[i].calculateAmplitude(sourcePoint) => amplitudes[i];
                 speakers[i].calculateDelayTime(sourcePoint, C) => delayTimes[i];

@@ -4,6 +4,7 @@ public class Speaker {
     float normal, radiusRef, amplitude, delayTime;
     Point speakerPoint;
     Line referenceLine;
+    float fs;
 
     public void setSpeakerPoint(float x, float y) {
         speakerPoint.set(x, y);
@@ -26,6 +27,10 @@ public class Speaker {
 
     public float getDelayTime() {
         return delayTime;
+    }
+
+    public float getSpeakerPointX() {
+        return speakerPoint.x;
     }
 
     public float calculateDelayTime(Point sourcePoint, float c) {
