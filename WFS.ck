@@ -2,10 +2,11 @@
 
 public class WFS {
     float amplitudes[0];
+    float taperAmplitudes[0];
     float delayTimes[0];
     float length, width, speakerArrayLength;
-    int isTapered;
-    0.2 => float taperWindow;
+    false => int isTapered;
+    0.2  => float taperWindow;
     1.05 => float taperLength;
 
     Speaker speakers[0];
@@ -33,20 +34,38 @@ public class WFS {
         }
     }
 
-    public void setTaperLength(float cm) {
-        cm => taperLength;
+    public void taperSpeakers(int taper) {
+        taper => isTapered;
     }
 
-    public void setTaperAttenuations() {
+    public void setTaper(float taperWin) {
+        true => isTapered;
+        taperWin => taperWindow;
+
+        speakerArrayLength / (numSpeakers - 1) => float speakerSpacing;
+        speakerArrayLength + speakerSpacing * 2 => taperLength;
+        setTaperAttenuations();
+    }
+
+    public void setTaper(float taperWin, float taperLen) {
+        taperLen => taperLength;
+        taperWin => taperWindow;
+        setTaperAttenuations();
+    }
+
+    private void setTaperAttenuations() {
         speakerArrayLength / (numSpeakers - 1) => float speakerSpacing;
         taperLength * 0.5 - speakerArrayLength * 0.5 => float speakerStartingPoint;
 
-        for (0 => int i; i < numSpeakers; i++) {
+        for (0 => int i; i < numSpeakers/2; i++) {
             speakerStartingPoint + speakerSpacing * i => float x;
-
-            if (x < taperWindow || x > taperLength - taperWindow) {
-                Math.sin(pi * x/taperLength) => float w;
-                <<< i, w >>>;
+            if (x < taperWindow) {
+                Math.sin(pi * 0.5 * (x/taperWindow)) => float w;
+                w => taperAmplitudes[i];
+                w => taperAmplitudes[numSpeakers - (i + 1)];
+            }
+            else {
+                1.0 => taperAmplitudes[i];
             }
         }
     }
@@ -58,6 +77,7 @@ public class WFS {
             speakers[i].setReferenceLine(referenceLine);
 
             amplitudes << 0.0;
+            taperAmplitudes << 1.0;
             delayTimes << 0.0;
         }
         number => numSpeakers;
@@ -101,6 +121,7 @@ public class WFS {
             if (!memoSourcePoint.isEqual(sourcePoint)) {
                 speakers[i].calculateAmplitude(sourcePoint) => amplitudes[i];
                 speakers[i].calculateDelayTime(sourcePoint, C) => delayTimes[i];
+                if (isTapered) taperAmplitudes[i] *=> amplitudes[i];
             } else {
                 speakers[i].getAmplitude() => amplitudes[i];
                 speakers[i].getDelayTime() => delayTimes[i];

@@ -126,6 +126,7 @@ fun void wfsSetup(WFS wfs, int numSpeakers, float referenceLine, float xSize, fl
     wfs.setSpeakerNumber(numSpeakers);
     wfs.setReferenceLine(referenceLine);
     wfs.setSpeakerArrayLength(speakerArrayLength);
+    wfs.setTaper(0.2);
 
     speakerArrayLength / (numSpeakers - 1) => float speakerSpacing;
     xSize * 0.5 - speakerArrayLength * 0.5 => float speakerStartingPoint;
@@ -137,7 +138,6 @@ fun void wfsSetup(WFS wfs, int numSpeakers, float referenceLine, float xSize, fl
         wfs.setSpeakerPoint(i, x, y);
         wfs.setSpeakerNormal(i, 270);
     }
-    wfs.setTaperAttenuations();
 }
 
 main();
