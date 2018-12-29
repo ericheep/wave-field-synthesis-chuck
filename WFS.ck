@@ -6,8 +6,8 @@ public class WFS {
     float delayTimes[0];
     float length, width, speakerArrayLength;
     false => int isTapered;
-    0.2  => float taperWindow;
-    1.05 => float taperLength;
+    0.2   => float taperWindow;
+    1.05  => float taperLength;
 
     Speaker speakers[0];
     Line referenceLine;
