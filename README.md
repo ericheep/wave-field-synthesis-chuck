@@ -1,4 +1,8 @@
 wave-field-synthesis
 --------------------
 
-Working through a class version of WFS before diving into a Chugin. Pretty good results just changing the amplitude and delay terms; researching how to implement a pre-eq filter and getting better front to back results.
+Nearly complete. Still lacking a pre-eq filter.
+
+TODO:
+* Add focused points (reverse delay times and add an "offset" delay).
+* Doublecheck code with creating speaker points and ensuring their distances are accurate.
