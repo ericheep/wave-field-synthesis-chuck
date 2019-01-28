@@ -84,7 +84,6 @@ public class WFS {
     }
 
     public void setSpeakerPoint(int index, float x, float y) {
-    <<< index, x, y >>>;
         speakers[index].setSpeakerPoint(x, y);
     }
 
