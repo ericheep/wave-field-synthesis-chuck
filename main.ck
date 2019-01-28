@@ -1,7 +1,7 @@
 // main.ck
 
 fun void main() {
-    "speakerArray" => string type;
+    "laptop" => string type;
     float referenceLineOffset;
     float xSize;
     int NUM_SPEAKERS;
@@ -28,12 +28,12 @@ fun void main() {
     Delay d[NUM_SPEAKERS];
 
     for (0 => int i; i < NUM_SPEAKERS; i++) {
-        /* g[i] => d[i] => dac.chan(i); */
+        g[i] => d[i] => dac.chan(i);
     }
 
     Point sourcePoint;
     /* movingPinkNoise(wfs, sourcePoint, NUM_SPEAKERS, g, d); */
-    voicePositions(wfs, sourcePoint, NUM_SPEAKERS, g, d);
+    voicePositions(wfs, sourcePoint, xSize, NUM_SPEAKERS, g, d);
 }
 
 fun void movingPinkNoise (WFS wfs, Point sourcePoint, int numSpeakers, Delay d[], Gain g[]) {
@@ -63,22 +63,22 @@ fun void movingPinkNoise (WFS wfs, Point sourcePoint, int numSpeakers, Delay d[]
     }
 }
 
-fun void voicePositions (WFS wfs, Point sourcePoint, int numSpeakers, Gain g[], Delay d[]) {
-    SndBuf voice;
+fun void voicePositions (WFS wfs, Point sourcePoint, float xSize, int numSpeakers, Gain g[], Delay d[]) {
+    SndBuf voice => PinkingFilter pinking;
 
     ["left-front.aiff",  "middle-front.aiff",  "right-front.aiff",
      "left-center.aiff", "middle-center.aiff", "right-center.aiff",
      "left-back.aiff",   "middle-back.aiff",   "right-back.aiff"]
      @=> string voiceFiles[];
 
-    [[0.1, 0.5], [0.5, 0.5], [0.9, 0.5],
-     [0.1, 2.5], [0.5, 2.5], [0.9, 2.5],
-     [0.1, 4.0], [0.5, 4.0], [0.9, 4.0]]
+    [[0.1, 0.25], [0.5, 0.25], [0.9, 0.25],
+     [0.1, 0.50], [0.5, 0.50], [0.9, 2.50],
+     [0.1, 1.00], [0.5, 1.00], [0.9, 1.00]]
      @=> float voiceCoordinates[][];
 
     for (0 => int i; i < numSpeakers; i++) {
-        voice => g[i];;
-        voice.gain(0.2);
+        pinking => g[i];;
+        voice.gain(0.4);
     }
 
     0 => int which;
@@ -86,7 +86,7 @@ fun void voicePositions (WFS wfs, Point sourcePoint, int numSpeakers, Gain g[], 
         voice.read(me.dir() + "voice-positions/" + voiceFiles[which]);
         voice.pos(0);
 
-        sourcePoint.set(voiceCoordinates[which][0], voiceCoordinates[which][1]);
+        sourcePoint.set(voiceCoordinates[which][0] * xSize, voiceCoordinates[which][1]);
         wfsUpdate(wfs, numSpeakers, sourcePoint, g, d);
 
         (voice.samples() * 3)::samp => now;

@@ -84,6 +84,7 @@ public class WFS {
     }
 
     public void setSpeakerPoint(int index, float x, float y) {
+    <<< index, x, y >>>;
         speakers[index].setSpeakerPoint(x, y);
     }
 
@@ -115,6 +116,23 @@ public class WFS {
         return amplitudes;
     }
 
+    public float[] reverseDelaysByMax(float delayTimes[], float maxDelay) {
+        for (0 => int i; i < delayTimes.size(); i++) {
+            maxDelay - delayTimes[i] => delayTimes[i];
+        }
+        return delayTimes;
+    }
+
+    public float getMaxDelay(float delayTimes[]) {
+        0.0 => float maxDelay;
+        for (0 => int i; i < delayTimes.size(); i++) {
+            if (delayTimes[i] > maxDelay) {
+                delayTimes[i] => maxDelay;
+            }
+        }
+        return maxDelay;
+    }
+
     // in m
     public void update(Point sourcePoint) {
         for (0 => int i; i < numSpeakers; i++) {
@@ -127,6 +145,12 @@ public class WFS {
                 speakers[i].getDelayTime() => delayTimes[i];
             }
         }
+
+        if (sourcePoint.y > 0.0) {
+            reverseDelaysByMax(delayTimes, getMaxDelay(delayTimes)) @=> delayTimes;
+        }
+
+        <<< delayTimes[0], delayTimes[1] >>>;
 
         memoSourcePoint.set(sourcePoint);
     }
