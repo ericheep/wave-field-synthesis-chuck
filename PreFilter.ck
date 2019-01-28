@@ -1,21 +1,19 @@
-public class PreFilter extends Chugen {
-    0 => float angularFrequency;
-    360.0 => float c;
-    pi * 2.0 => float tau;
-    c * tau => float tauCProduct;
+// PreFilter.ck
+// pinking filter at 3dB/ocatave
+// http://www.firstpr.com.au/dsp/pink-noise/
 
-    public void setC (float _c) {
-        _c => c;
-        c * tau => tauCProduct;
-    }
+public class PinkingFilter extends Chugen {
+    float b0, b1, b2, b3, b4, b5, b6;
 
-    public void setAngularFrequency (float a) {
-        a => angularFrequency;
-    }
-
-    private float tick (float in) {
-        Math.sqrt((Math.fabs(in) * angularFrequency)/tauCProduct) => float out;
-        return out * Math.sgn(in);
+    fun float tick(float in) {
+        0.99886 * b0 + in * 0.0555179 => b0;
+        0.99332 * b1 + in * 0.0750759 => b1;
+        0.96900 * b2 + in * 0.1538520 => b2;
+        0.86650 * b3 + in * 0.3104856 => b3;
+        0.55000 * b4 + in * 0.5329522 => b4;
+        -0.7616 * b5 - in * 0.0168980 => b5;
+        b0 + b1 + b2 + b3 + b4 + b5 + b6 + in * 0.5362 => float pink;
+        in * 0.115926 => b6;
+        return pink;
     }
 }
-
