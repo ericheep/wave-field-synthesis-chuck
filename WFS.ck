@@ -150,8 +150,6 @@ public class WFS {
             reverseDelaysByMax(delayTimes, getMaxDelay(delayTimes)) @=> delayTimes;
         }
 
-        <<< delayTimes[0], delayTimes[1] >>>;
-
         memoSourcePoint.set(sourcePoint);
     }
 }
