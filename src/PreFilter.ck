@@ -1,4 +1,6 @@
-// Pinking Filter.ck
+// PreFilter.ck
+// pinking filter at 3dB/ocatave
+// http://www.firstpr.com.au/dsp/pink-noise/
 
 public class PinkingFilter extends Chugen {
     float b0, b1, b2, b3, b4, b5, b6;
